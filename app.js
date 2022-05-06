@@ -10,12 +10,12 @@ const app = express();
 //use function takes 3 arguments
 //If you use next function then request will continue it's journey
 app.use((req, res, next)=>{
-    console.log('Sanjana Middleware');
+    console.log('Middleware');
     next();
 });
 
 app.use((req, res, next)=>{
-    res.send('Hello Sanjana!');
+    res.send('Hello!');
 });
 
 // we want to use this app in server. to do that we need export it
