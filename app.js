@@ -1,22 +1,82 @@
-const express = require("express");
+const express = require('express');
+const bodyParser = require('body-parser');
+const Task = require('./models/task');
+const mongoose = require('mongoose');
 
-//Create a express app with following command
-const app = express();
+const app = express()
+mongoose.connect('mongodb://localhost:4200/Todoapp').catch(error => handleError(error));
 
-//express is a chain of middlewares, that we apply to the incoming requests. Each part of the funnel can do something with the request
-//It could read it, manipulate it, or do something with response,send response.
+async function run() {
+    try {
+            await mongoose.connect('mongodb://localhost:4200/Todoapp');
+        } catch (error) {
+              handleError(error);
+            }
+}
 
-// We add that middleware with following
-//use function takes 3 arguments
-//If you use next function then request will continue it's journey
+run();
+
+app.use(bodyParser.json());
+
 app.use((req, res, next)=>{
-    console.log('Middleware');
+    //this means no matter which domain sending request it is allowed to access server
+    res.setHeader("Access-Control-Allow-Origin","*");
+    // allow types of headers
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept');
+    //allow methods that we want to make accessible
+    res.setHeader('Access-Control-Allow-Methods',"GET,POST,PUT,DELETE,OPTIONS");
     next();
 });
 
-app.use((req, res, next)=>{
-    res.send('Hello!');
+app.get('/api/tasks',(req, res)=>{
+    Task.find().then(documents => {
+        res.status(200).json({
+            message: "Tasks received successfully",
+            tasks: documents
+        });
+    });
+   
 });
 
-// we want to use this app in server. to do that we need export it
+app.post('/api/tasks',(req, res)=>{
+    //const task = req.body;
+    const task = new Task({
+        title: req.body.title,
+        content: req.body.content
+    });
+    console.log('*******Task Received', task);
+    
+    /*task.save();
+    res.status(201).json({
+        message:"Tasks stored successfully"
+    });*/
+
+    task.save().then(createdTask => {
+        res.status(201).json({
+          message: "Task added successfully",
+          taskId: createdTask._id
+        });
+      });
+
+});
+
+app.put('/api/tasks/:id', (req, res, next)=>{
+    const task = new Task({
+        _id: req.body.id,
+        title: req.body.title,
+        content: req.body.content
+    });
+    Task.updateOne({_id: req.params.id}, task).then(result =>{
+        console.log(result);
+        res.status(200).json({message: "updated successfully"});
+    });
+});
+
+app.delete('/api/tasks/:id', (req, res)=>{
+    Task.deleteOne({_id: req.params.id}).then(result =>{
+        console.log(result);
+        res.status(200).json({message: "Task Delete!"});
+    });
+});
+
 module.exports = app;
