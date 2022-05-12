@@ -4,11 +4,11 @@ const Task = require('./models/task');
 const mongoose = require('mongoose');
 
 const app = express()
-mongoose.connect('mongodb://localhost:4200/Todoapp').catch(error => handleError(error));
+mongoose.connect('mongodb://localhost:27017/Todoapp').catch(error => handleError(error));
 
 async function run() {
     try {
-            await mongoose.connect('mongodb://localhost:4200/Todoapp');
+            await mongoose.connect('mongodb://localhost:27017/Todoapp');
         } catch (error) {
               handleError(error);
             }
